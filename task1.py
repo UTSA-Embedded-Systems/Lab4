@@ -76,7 +76,11 @@ def turnRight(powerR):
     return ack
 
 def readSonicCM(port):
-    pass
+    msg = str(command.READ_DIST.value) + " " + str(port)
+    ack = cmdSend(msg)
+    return ack
 
 def readSonicIN(port):
-    pass
+    msg = str(command.READ_DIST.value) + " " + str(port)
+    ack = cmdSend(msg)
+    return ack
