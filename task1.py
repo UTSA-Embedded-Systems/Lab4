@@ -1,5 +1,18 @@
 import serial
 import time
+from enum import Enum
+
+class direction(Enum):
+    LEFT = 0
+    RIGHT = 1
+
+class command(Enum):
+    HANDSHAKE = 1
+    READ_DIST = 2
+    TURN = 3
+    FORWARD = 4
+    BACKWARD = 5
+    STOP = 6
 
 def cmdSend(ser, cmd):
     msg = str(cmd) + "\n"
@@ -8,11 +21,11 @@ def cmdSend(ser, cmd):
     ack = ack_origin[:-2].decode("utf-8")    
     return ack
 
-def initSerComm(baudrate):
+def initSerComm(arduino_port, baudrate):
     print(" RP3 Robot Controller: Starting...")
     ser = None 
     try:
-        ser = serial.Serial('/dev/ttyUSB0', baudrate, timeout=1)
+        ser = serial.Serial(arduino_port, baudrate, timeout=1)
         
         print("Press the GREEN button on the PRIZM to start the robot")
         while True:
