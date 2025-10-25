@@ -2,6 +2,9 @@ import serial
 import time
 from enum import Enum
 
+ser = None 
+
+
 class direction(Enum):
     LEFT = 0
     RIGHT = 1
@@ -14,7 +17,8 @@ class command(Enum):
     BACKWARD = 5
     STOP = 6
 
-def cmdSend(ser, cmd):
+def cmdSend(cmd):
+    global ser
     msg = str(cmd) + "\n"
     ser.write(msg.encode())
     ack_origin = ser.readline()
@@ -22,8 +26,8 @@ def cmdSend(ser, cmd):
     return ack
 
 def initSerComm(arduino_port, baudrate):
+    global ser
     print(" RP3 Robot Controller: Starting...")
-    ser = None 
     try:
         ser = serial.Serial(arduino_port, baudrate, timeout=1)
         
@@ -52,16 +56,24 @@ def initSerComm(arduino_port, baudrate):
             
 
 def moveForward(power):
-    pass
+    msg = str(command.FORWARD.value) + " " + str(power)
+    ack = cmdSend(msg)
+    return ack
 
 def moveBack(power):
-    pass
+    msg = str(command.BACKWARD.value) + " " + str(power)
+    ack = cmdSend(msg)
+    return ack
 
-def turnLeft(power):
-    pass
+def turnLeft(powerR):
+    msg = str(command.TURN.value) + " " + str(powerL) + " " + str(powerR)+ " " + str(direction.LEFT.value)
+    ack = cmdSend(msg)
+    return ack
 
-def turnRight(power):
-    pass
+def turnRight(powerR):
+    msg = str(command.TURN.value) + " " + str(powerL) + " " + str(powerR)+ " " + str(direction.RIGHT.value)
+    ack = cmdSend(msg)
+    return ack
 
 def readSonicCM(port):
     pass
