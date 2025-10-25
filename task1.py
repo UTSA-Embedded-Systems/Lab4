@@ -30,7 +30,7 @@ def initSerComm(arduino_port, baudrate):
         print("Press the GREEN button on the PRIZM to start the robot")
         while True:
             print("--- Sending out handshaking signal (cmd 1) ---")
-            ack = cmdSend(ser, 1)
+            ack = cmdSend(ser, command.HANDSHAKE)
 
             if not ack: 
                 print("*** No response. Trying again... ***")
