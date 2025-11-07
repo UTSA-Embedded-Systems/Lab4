@@ -3,19 +3,20 @@
 #include <time.h>
 
 PRIZM prizm;
+
 enum DIRECTION {
     LEFT = 0,
     RIGHT = 1,
-}
+};
 
 enum CMD {
     HANDSHAKE = 1,
     READ_DIST = 2,
-    TURN = 3
-    FORWARD = 4
-    BACK = 5
+    TURN = 3,
+    FORWARD = 4,
+    BACK = 5,
     STOP = 6
-}
+};
 
 void handshake();
 
@@ -35,18 +36,18 @@ void setup() {
 }
 
 void loop() {
-    handshake();
+    // handshake();
     if (Serial.available()) {
         String line = Serial.readStringUntil('\n');
         switch (line.charAt(0)) {
             case '2':
-                Serial.println(prizm.readDistanceCM());
+                Serial.println(String(prizm.readSonicSensorCM(3)));
                 break;
             case '3':
                 {
                     int powerL = line.charAt(1)-'0';
                     int powerR = line.charAt(2)-'0';
-                    enum DIRECTION dir = (enum DIRECTION)line.charAt(3) - '0';
+                    enum DIRECTION dir = static_cast<DIRECTION>(line.charAt(3) - '0');
                     turn(dir, powerL, powerR);
                 }
                 break;
@@ -69,7 +70,8 @@ void loop() {
                 break;
             default:
                 Serial.println(9);
-        Serial.flush();
+                break;
+        }
     }
 }
 
@@ -77,9 +79,8 @@ void handshake() {
     for(;;) {
         if (Serial.available()) {
             String line = Serial.readStringUntil('\n');
-            if (line.toInt() == CMD.HANDSHAKE) {
-                Serial.println(CMD.HANDSHAKE);
-                Serial.flush();
+            if (line.toInt() == HANDSHAKE) {
+                Serial.println(line);
                 break;
             }
         }
@@ -95,7 +96,7 @@ void moveBackwards(int power) {
 }
 
 void stop() {
-    prizm.setMotorPowers(0, 0);
+    prizm.setMotorPowers(125, 125);
 }
 
 void turn(enum DIRECTION dir, int pl, int pr) {
