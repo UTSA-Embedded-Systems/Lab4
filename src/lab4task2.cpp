@@ -36,12 +36,13 @@ void setup() {
 }
 
 void loop() {
-    // handshake();
+    handshake();
     if (Serial.available()) {
         String line = Serial.readStringUntil('\n');
         switch (line.charAt(0)) {
             case '2':
-                Serial.println(String(prizm.readSonicSensorCM(3)));
+                //Serial.println(String(prizm.readSonicSensorCM(3)));
+                Serial.println("Read this word");
                 break;
             case '3':
                 {
@@ -69,7 +70,7 @@ void loop() {
                 stop();
                 break;
             default:
-                Serial.println(9);
+                Serial.println("Send some words");
                 break;
         }
     }
@@ -80,7 +81,7 @@ void handshake() {
         if (Serial.available()) {
             String line = Serial.readStringUntil('\n');
             if (line.toInt() == HANDSHAKE) {
-                Serial.println(line);
+                Serial.println("1");
                 break;
             }
         }

@@ -24,7 +24,7 @@ class command(Enum):
 def handshake():
     while True:
             print("--- Sending out handshaking signal (cmd 1) ---")
-            ack = cmdSend(ser, command.HANDSHAKE)
+            ack = cmdSend(command.HANDSHAKE.value)
             if not ack: 
                 print("*** No response. Trying again... ***")
                 time.sleep(1)
@@ -41,7 +41,7 @@ def initSerComm():
         print("In loop")
         while True:
             dist = readSonicCM()
-            print("Dsit: " + dist)
+            print("Dist: " + dist)
             if dist <= 5:
                 stop()
                 moveBack()
@@ -65,16 +65,16 @@ def initSerComm():
     finally:
         if ser and ser.is_open:
             print("Stopping motors (cmd 5) and closing serial connection...")
-            cmdSend(ser, 5) 
+            cmdSend(5) 
             ser.close()
 
 def cmdSend(cmd, param=""):
     print("Send: " + str(cmd))
     msg = str(cmd) +"\n"
-
     ser.write(msg.encode())
     ack_origin = ser.readline()
     ack = ack_origin[:-2].decode('utf-8')
+    print("Recv: " + ack_origin)
     return ack
 
 
@@ -104,7 +104,7 @@ def turnRight(power):
     return ack
 
 def readSonicCM():
-    msg = '2'
+    msg = "2"
     ack = cmdSend(msg)
     return ack
 
