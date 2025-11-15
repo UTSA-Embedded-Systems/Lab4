@@ -6,7 +6,7 @@ import random
 SERIAL_PORT = '/dev/ttyUSB0' 
 BAUD_RATE = 9600
 
-ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
+ser = None
 
 
 class direction(Enum):
@@ -35,27 +35,10 @@ def handshake():
             
 
 def initSerComm():
+    
     print(" RP3 Robot Controller: Starting...")
     try:
-        handshake()
-        print("In loop")
-        while True:
-            dist = readSonicCM()
-            print("Dist: " + dist)
-            if dist <= 5:
-                stop()
-                moveBack()
-                if random.randint(0,1):
-                    turnLeft(30)
-                else:
-                    turnRight(30)
-            else:
-                moveForward(random.randint(20, 50))
-                # if random.randint(0,1):
-                #     turnLeft(random.randint(20, 40))
-                # else:
-                #     turnRight(random.randint(20, 40))
-
+        ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
         
     except serial.SerialException:
         print(" Error: Could not open serial port .")
@@ -79,39 +62,39 @@ def cmdSend(cmd, param=""):
 
 
 def stop():
-    msg = str(command.STOP)
+    print("Stop")
+    msg = str(command.STOP.value)
     ack = cmdSend(msg)
     return ack
 
 def moveForward(power):
+    print("Forward")
     msg = str(command.FORWARD.value) + " " + str(power)
     ack = cmdSend(msg)
     return ack
 
 def moveBack(power):
+    print("Backward")
     msg = str(command.BACKWARD.value) + " " + str(power)
     ack = cmdSend(msg)
     return ack
 
-def turnLeft(power):
-    msg = str(command.TURN.value) + " " + str(power) + " " + str(power/2)+ " " + str(direction.LEFT.value)
+def turn(dir, power):
+    print("turn")
+    msg = str(command.TURN.value) + " " + str(power) + " " + str(dir)
     ack = cmdSend(msg)
     return ack
 
-def turnRight(power):
-    msg = str(command.TURN.value) + " " + str(power/2) + " " + str(power)+ " " + str(direction.RIGHT.value)
-    ack = cmdSend(msg)
-    return ack
 
 def readSonicCM():
     msg = "2"
     ack = cmdSend(msg)
-    return ack
+    return int(ack)
 
 def readSonicIN():
     msg = str(command.READ_DIST.value)
     ack = cmdSend(msg)
-    return ack
+    return int(ack)
 
 if __name__ == "__main__":
     initSerComm()

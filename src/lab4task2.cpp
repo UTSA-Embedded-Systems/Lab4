@@ -1,8 +1,11 @@
 #include <PRIZM.h>
 #include <Wire.h>
 #include <time.h>
+#include <string>
 
 PRIZM prizm;
+
+using namespace std;
 
 enum DIRECTION {
     LEFT = 0,
@@ -26,51 +29,63 @@ void moveBackwards(int power);
 
 void stop();
 
-void turn(enum DIRECTION dir, int powerL, int powerR);
+void turn(enum DIRECTION dir, int power);
 
 void setup() {
     Serial.begin(9600);
     prizm.PrizmBegin();
     prizm.setMotorInvert(1,1);
-    delay(100);
+    handshake();
+}
+
+vector<string> split(const string& text, const string& del) {
+    vector<string> tokens;
+    size_t l = 0;
+    size_t r = 0;
+    string token;
+    while((r = text.find(del, l)) != string::npos) {
+        token = text.substr(l, r-l);
+        tokens.push_back(token);
+        l = r+del.length();
+    }
+    tokens.push_back(text.substr(l));
+    return tokens;
 }
 
 void loop() {
-    handshake();
     if (Serial.available()) {
         String line = Serial.readStringUntil('\n');
-        switch (line.charAt(0)) {
+        vector<string> tokens = split(line.c_str(), " ");
+        string cmd = tokens[0];
+        switch (cmd.c_str()[0]) {
             case '2':
-                //Serial.println(String(prizm.readSonicSensorCM(3)));
-                Serial.println("Read this word");
+                Serial.println(String(prizm.readSonicSensorCM(3)));
                 break;
             case '3':
                 {
-                    int powerL = line.charAt(1)-'0';
-                    int powerR = line.charAt(2)-'0';
-                    enum DIRECTION dir = static_cast<DIRECTION>(line.charAt(3) - '0');
-                    turn(dir, powerL, powerR);
+                    int power = atoi(tokens[1].c_str());
+                    enum DIRECTION dir = static_cast<DIRECTION>( atoi(tokens[2].c_str()));
+                    turn(dir, power);
                 }
                 break;
             case '4':
                 {
-                    int power = line.charAt(1)-'0';
+                    int power = atoi(tokens[1].c_str());
                     moveForward(power);
 
                 }
                 break;
             case '5':
                 {
-                    int power = line.charAt(2)-'0';
+                    int power = atoi(tokens[1].c_str());
                     moveBackwards(power);
-
                 }
                 break;
             case '6':
                 stop();
                 break;
             default:
-                Serial.println("Send some words");
+                Serial.println("Default case");
                 break;
         }
     }
@@ -100,10 +115,15 @@ void stop() {
     prizm.setMotorPowers(125, 125);
 }
 
-void turn(enum DIRECTION dir, int pl, int pr) {
-    int invert =  1 - (dir == RIGHT)*2;
-    pl = pl * invert;
-    pr = pr * invert;
+void turn(enum DIRECTION dir, int p) {
+    int pl, pr;
+    if (dir == LEFT) {
+        pl = -(p);
+        pr = p;
+    } else {
+        pr = -(p);
+        pl = p;
+    }
 
     prizm.setMotorPowers(pl, pr);
 };
