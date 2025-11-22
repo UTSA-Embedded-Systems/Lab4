@@ -8,7 +8,6 @@ BAUD_RATE = 9600
 
 ser = None
 
-
 class direction(Enum):
     LEFT = 0
     RIGHT = 1
@@ -22,6 +21,7 @@ class command(Enum):
     STOP = 6
 
 def handshake():
+    global ser
     while True:
             print("--- Sending out handshaking signal (cmd 1) ---")
             ack = cmdSend(command.HANDSHAKE.value)
@@ -35,9 +35,10 @@ def handshake():
             
 
 def initSerComm():
-    
+    global ser
     print(" RP3 Robot Controller: Starting...")
     try:
+        
         ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
         
     except serial.SerialException:
@@ -45,13 +46,10 @@ def initSerComm():
         print("Please check the port name and ensure the PRIZM is connected.")
     except KeyboardInterrupt:
         print("\n Program terminated")
-    finally:
-        if ser and ser.is_open:
-            print("Stopping motors (cmd 5) and closing serial connection...")
-            cmdSend(5) 
-            ser.close()
+    print("Serial init...")
 
-def cmdSend(cmd, param=""):
+def cmdSend(cmd):
+    global ser
     print("Send: " + str(cmd))
     msg = str(cmd) +"\n"
     ser.write(msg.encode())
@@ -62,24 +60,28 @@ def cmdSend(cmd, param=""):
 
 
 def stop():
+    global ser
     print("Stop")
     msg = str(command.STOP.value)
     ack = cmdSend(msg)
     return ack
 
 def moveForward(power):
+    global ser
     print("Forward")
     msg = str(command.FORWARD.value) + " " + str(power)
     ack = cmdSend(msg)
     return ack
 
 def moveBack(power):
+    global ser
     print("Backward")
     msg = str(command.BACKWARD.value) + " " + str(power)
     ack = cmdSend(msg)
     return ack
 
 def turn(dir, power):
+    global ser
     print("turn")
     msg = str(command.TURN.value) + " " + str(power) + " " + str(dir)
     ack = cmdSend(msg)
@@ -87,14 +89,15 @@ def turn(dir, power):
 
 
 def readSonicCM():
+    global ser
     msg = "2"
     ack = cmdSend(msg)
-    return int(ack)
+    return int(ack) if ack else None
+
 
 def readSonicIN():
+    global ser
     msg = str(command.READ_DIST.value)
     ack = cmdSend(msg)
     return int(ack)
 
-if __name__ == "__main__":
-    initSerComm()
