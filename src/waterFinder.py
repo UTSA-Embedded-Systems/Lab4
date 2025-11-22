@@ -13,15 +13,18 @@ BP.set_sensor_type(BP.PORT_2, BP.SENSOR_TYPE.EV3_COLOR_COLOR)
 
 def color_proc(bp, event, eventTwo, color_val):
     while True:
-        eventTwo.clear()
         color = COLORS[bp.get_sensor(bp.PORT_2)]
         print("Color: ", color)
         if color in AMERICA:
             color_val.value = color.encode()
             print("In America")
+            ser.reset_input_buffer()
+            ser.reset_output_buffer()
+            stop()
+            ser.flush()
             event.set()
             eventTwo.wait()
-            
+            eventTwo.clear()
         time.sleep(0.1)
 
 def verify_color(bp, color_val):
@@ -32,14 +35,7 @@ def verify_color(bp, color_val):
         color_count += color_val == color
         time.sleep(0.2)
     return color_count >= 5
-
-def avoid_obstacle():
-    stop()
-    moveBack(10)
-    time.sleep(3)
-    turn(random.randint(0,1), 10)
-    time.sleep(4)
-    stop()
+    
 
 def main():
     color = Value(ctypes.c_char*16)
@@ -61,8 +57,11 @@ def main():
             distance = readSonicCM()
             print("Distance: ", distance)
             if distance and distance <=15:
-                avoid_obstacle()
-            moveForward(10)
+                moveBack(10)
+                time.sleep(3)
+                turn(random.randint(0,1), 10)
+                time.sleep(4)
+                stop()
             if color_event.is_set():
                 seen_color = color.value.decode()
                 print("Color event: ", seen_color)
@@ -72,8 +71,8 @@ def main():
                         print("Exiting circle turning around!")
                         moveBack(10)
                         time.sleep(2)
-                        turn(1, 10) # TODO: tweak to do full 180
-                        time.sleep(2)
+                        turn(1, 20) # TODO: tweak to do full 180
+                        time.sleep(4)
                         stop()
                     elif seen_color == "Blue": # Goal met
                         print("In goal!")
@@ -83,6 +82,7 @@ def main():
                         break
                     else:
                         color_circle = seen_color
+                moveForward(10)
                 color.value = b"none"
                 color_event.clear()
                 color_event_t.set()
@@ -90,7 +90,6 @@ def main():
         # dist_p.join()
     except Exception as e:
         print("An exception occured: ", e)
-
 
 if __name__ == '__main__':
     main()
