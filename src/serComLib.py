@@ -32,7 +32,12 @@ def handshake():
                 print(" Connected to the robot Received ack:")
                 ser.readall()
                 break
-            
+
+def getSer():
+    global ser
+    if not ser:
+        initSerComm()
+    return ser       
 
 def initSerComm():
     global ser
