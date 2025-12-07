@@ -17,17 +17,12 @@ color_q = deque(maxlen=3)
 def color_proc(bp, event, eventTwo, color_val):
     while True:
         color_read = COLORS[bp.get_sensor(bp.PORT_2)]
-        print("Color: ", color_read)
         color_q.append(color_read)
 
         if color_read in AMERICA and len(color_q) == color_q.maxlen and len(set(color_q)) == 1:
             color_val.value = color_read.encode()
             print("Color confirmed:", color_read)
             color_q.clear()
-            # ser.reset_input_buffer()
-            # ser.reset_output_buffer()
-            # stop()
-            # ser.flush()
             event.set()
             eventTwo.wait()
             eventTwo.clear()
